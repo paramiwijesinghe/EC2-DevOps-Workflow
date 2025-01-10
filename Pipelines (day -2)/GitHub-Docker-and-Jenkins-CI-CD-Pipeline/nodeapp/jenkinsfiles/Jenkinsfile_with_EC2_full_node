@@ -1,0 +1,83 @@
+pipeline {
+    agent any
+
+    environment {
+        ImageRegistry = 'adomicarts'    // Docker Hub username
+        EC2_IP = '13.61.147.152'       // Replace with your EC2 instance's public IP
+        AppName = 'dntx-server'        // Application name
+        GitRepo = 'https://github.com/HGSChandeepa/GitHub-Docker-and-Jenkins-CI-CD-Pipeline'
+        GitBranch = 'main'             // Branch to pull
+        EC2_User = 'ubuntu'            // EC2 instance username
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                script {
+                    echo "Fetching code from GitHub..."
+                    git branch: GitBranch, url: GitRepo
+                }
+            }
+        }
+
+        stage('Login to Docker Hub') {
+            steps {
+                withCredentials([string(credentialsId: 'docker-password', variable: 'dockerPassword')]) {
+                    script {
+                        bat """
+                        docker login -u adomicarts -p %dockerPassword%
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    echo "Building Docker Image..."
+                    bat """
+                    docker build -t ${ImageRegistry}/${AppName}:${BUILD_NUMBER} .
+                    """
+                }
+            }
+        }
+
+        stage('Push Docker Image to Docker Hub') {
+            steps {
+                script {
+                    echo "Pushing Docker Image to Docker Hub..."
+                    bat """
+                    docker push ${ImageRegistry}/${AppName}:${BUILD_NUMBER}
+                    """
+                }
+            }
+        }
+
+        stage("deployCompose") {
+    steps {
+        script {
+            echo "Deploying with Docker Compose..."
+            sshagent(['ec2']) {
+                // Upload files once to reduce redundant SCP commands
+                sh """
+                scp -o StrictHostKeyChecking=no ${DotEnvFile} ${DockerComposeFile} ubuntu@${EC2_IP}:/home/ubuntu
+                ssh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} "docker compose -f /home/ubuntu/${DockerComposeFile} --env-file /home/ubuntu/${DotEnvFile} down"
+                ssh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} "docker compose -f /home/ubuntu/${DockerComposeFile} --env-file /home/ubuntu/${DotEnvFile} up -d"
+                """
+            }
+        }
+    }
+}
+
+
+
+    }
+
+    post {
+        always {
+            echo "Cleaning up workspace..."
+            cleanWs()
+        }
+    }
+}
