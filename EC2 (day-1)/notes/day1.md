@@ -52,7 +52,7 @@
 
 ---
 
-## Day 02: EC2 Deployment Architecture and Implementation
+## EC2 Deployment Architecture and Implementation
 
 ### Architecture Diagram
 

@@ -7,7 +7,7 @@ const AppNotes = () => {
   useEffect(() => {
     const fetchNotes = async () => {
       try {
-        const response = await fetch("http://localhost:9000/notes");
+        const response = await fetch("http://localhost:8000/notes");
         const data = await response.json();
         setNotes(data);
       } catch (error) {
@@ -20,7 +20,7 @@ const AppNotes = () => {
   const addNote = async () => {
     try {
       const note = { content: newNote };
-      const response = await fetch("http://localhost:9000/notes", {
+      const response = await fetch("http://localhost:8000/notes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(note),
