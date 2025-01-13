@@ -89,7 +89,7 @@
 5. Start the backend server using **PM2** for process management:
    ```bash
    sudo npm install -g pm2
-   pm2 start app.js
+   pm2 start index.js
    ```
 
 #### Frontend Deployment
@@ -104,9 +104,21 @@
    npm run build
    ```
 3. Serve the app using `serve`:
+
    ```bash
    sudo npm install -g serve
-   serve -s build -l 3000
+   serve -n
+   serve -n -p 3001
+   ```
+
+4. Serve the default HTTP port using serve as supper user:
+
+   ```bash
+   sudo apt update
+   sudo apt install nodejs npm
+   sudo npm install -g serve
+   sudo serve -n -p 80
+
    ```
 
 ### Updating Endpoint Configurations
