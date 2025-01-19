@@ -33,6 +33,8 @@ app.get("/posts/:id", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+app
+  .listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  })
+  .setTimeout(120000);//set timeout to 2 minutes
